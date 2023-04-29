@@ -7,10 +7,13 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float aimFov = 50;
     [SerializeField] private float readyToShootFov = 46;
     [SerializeField] private float regularFov = 60;
+    [SerializeField] private float timeBetweenShots = 0.7f;
+    private float timeSinceLastShot = 0.0f;
 
     [SerializeField] private CharacterController controller;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Camera viewCamera;
+    [SerializeField] private AudioSource gunshotSource;
 
     [SerializeField] private AnimationCurve aimCurve;
     private float aimTime = 0.0f;
@@ -24,6 +27,7 @@ public class FirstPersonController : MonoBehaviour
     {
         float moveY = 0;
         float moveX = 0;
+        timeSinceLastShot += Time.deltaTime;
 
         if(Input.GetMouseButton(1))
         {
@@ -34,7 +38,11 @@ public class FirstPersonController : MonoBehaviour
             {
                 if(Input.GetMouseButtonDown(0))
                 {
-                    Debug.Log("Shoot");
+                    if(timeSinceLastShot >= timeBetweenShots)
+                    {
+                        gunshotSource.Play();
+                        timeSinceLastShot = 0.0f;
+                    }
                 }
             }
         }
