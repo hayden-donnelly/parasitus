@@ -17,6 +17,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private GameObject crosshair;
     [SerializeField] private Transform bulletOrigin;
     [SerializeField] private GameObject nonEnemyHitEffect;
+    [SerializeField] private AudioSource breatheInSource;
 
     [SerializeField] private AnimationCurve aimCurve;
     private float aimTime = 0.0f;
@@ -43,6 +44,13 @@ public class FirstPersonController : MonoBehaviour
             crosshair.SetActive(false);
         }
 
+        if(Input.GetMouseButtonDown(1))
+        {
+            if(!breatheInSource.isPlaying)
+            {
+                breatheInSource.Play();
+            }
+        }
         if(Input.GetMouseButton(1))
         {
             aimTime += Time.deltaTime;
