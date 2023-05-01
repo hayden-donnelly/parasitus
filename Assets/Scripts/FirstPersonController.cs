@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class FirstPersonController : MonoBehaviour
 {
+    [SerializeField] private int health = 2;
+    [SerializeField] private bool frozen = false;
+    [SerializeField] private float attackKickback = 1.5f;
+    private float freezeTime = 0.0f;
     [SerializeField] private float moveSpeed = 4.0f;
     [SerializeField] private float rotationSpeed = 5.0f;
     [SerializeField] private float aimFov = 50;
@@ -16,7 +20,6 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private AudioSource gunshotSource;
     [SerializeField] private GameObject crosshair;
     [SerializeField] private Transform bulletOrigin;
-    [SerializeField] private GameObject nonEnemyHitEffect;
     [SerializeField] private AudioSource breatheInSource;
 
     [SerializeField] private AnimationCurve aimCurve;
@@ -31,8 +34,6 @@ public class FirstPersonController : MonoBehaviour
 
     private void Update()
     {
-        float moveY = 0;
-        float moveX = 0;
         timeSinceLastShot += Time.deltaTime;
 
         if(viewCamera.fieldOfView <= readyToShootFov)
@@ -43,6 +44,26 @@ public class FirstPersonController : MonoBehaviour
         {
             crosshair.SetActive(false);
         }
+
+        if(!frozen)
+        {
+            FirstPersonControls();
+        }
+        else
+        {
+            freezeTime -= Time.deltaTime;
+            if(freezeTime <= 0.0f)
+            {
+                frozen = false;
+                controller.Move(transform.forward * -attackKickback);
+            }
+        }
+    }
+
+    private void FirstPersonControls()
+    {
+        float moveY = 0;
+        float moveX = 0;
 
         if(Input.GetMouseButtonDown(1))
         {
@@ -72,14 +93,6 @@ public class FirstPersonController : MonoBehaviour
                             else if(hit.collider.CompareTag("Enemy Head"))
                             {
                                 DamageEnemyFromRaycast(hit, true);
-                            }
-                            else
-                            {
-                                Debug.Log("Hit something else");
-                                Debug.Log(hit.point);
-                                GameObject effectInstance = Instantiate(nonEnemyHitEffect, hit.point, Quaternion.identity);
-                                Destroy(effectInstance, 0.5f);
-                                effectInstance.transform.forward = hit.normal;
                             }
                         }
 
@@ -123,7 +136,28 @@ public class FirstPersonController : MonoBehaviour
 
     private void DamageEnemyFromRaycast(RaycastHit hit, bool headshot)
     {
-        GameObject enemy = hit.collider.transform.parent.gameObject;
+        GameObject enemy = hit.collider.transform.parent.parent.gameObject;
         enemy.GetComponent<EnemyBase>().TakeDamage(headshot);
+    }
+
+    public void DamagePlayer(float time, Vector3 enemyHeadPosition)
+    {
+        health--;
+        frozen = true;
+        freezeTime = time;
+        aimTime = 0.0f;
+        viewCamera.fieldOfView = regularFov;
+        if(health <= 0)
+        {
+            Debug.Log("Game Over");
+        }
+
+        Vector3 directionOfEnemy = enemyHeadPosition - transform.position;
+        transform.forward = new Vector3(directionOfEnemy.x, 0, directionOfEnemy.z);
+        cameraTransform.rotation = Quaternion.Euler(
+            -20, 
+            cameraTransform.rotation.eulerAngles.y, 
+            cameraTransform.rotation.eulerAngles.z
+        );
     }
 }
