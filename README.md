@@ -4,3 +4,6 @@ Parasitus is horror game inspired by other horror games from the PS1 like Reside
 [Download on itch.io](https://hayden-donnelly.itch.io/parasitus)
 
 ## Screenshots
+![terrain_screenshot](./images/parasitus_sc_03.png)
+![terrain_screenshot](./images/parasitus_sc_02.png)
+![terrain_screenshot](./images/parasitus_sc_01.png)
