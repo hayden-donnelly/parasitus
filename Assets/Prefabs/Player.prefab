@@ -704,7 +704,7 @@ MonoBehaviour:
   attackKickback: 1.5
   interactDistance: 2
   moveSpeed: 4
-  rotationSpeed: 200
+  rotationSpeed: 50
   aimFov: 50
   readyToShootFov: 55
   regularFov: 60
