@@ -5,6 +5,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private int health = 2;
     [SerializeField] private bool frozen = false;
     [SerializeField] private float attackKickback = 1.5f;
+    [SerializeField] private float interactDistance = 2.0f;
     private float freezeTime = 0.0f;
     [SerializeField] private float moveSpeed = 4.0f;
     [SerializeField] private float rotationSpeed = 5.0f;
@@ -12,6 +13,9 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float readyToShootFov = 55;
     [SerializeField] private float regularFov = 60;
     [SerializeField] private float timeBetweenShots = 0.7f;
+    [SerializeField] private float timeFromDeathToGameOver = 2.0f;
+    private float timeSinceDeath = 0.0f;
+    private bool isDead = false;
     private float timeSinceLastShot = 0.0f;
 
     [SerializeField] private CharacterController controller;
@@ -21,6 +25,9 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private GameObject crosshair;
     [SerializeField] private Transform bulletOrigin;
     [SerializeField] private AudioSource breatheInSource;
+    [SerializeField] private AudioSource doorSource;
+    [SerializeField] private AudioSource lockedDoorSource;
+    [SerializeField] private AudioSource keySource;
 
     [SerializeField] private AnimationCurve aimCurve;
     private float aimTime = 0.0f;
@@ -34,6 +41,16 @@ public class FirstPersonController : MonoBehaviour
 
     private void Update()
     {
+        if(isDead)
+        {
+            timeSinceDeath += Time.deltaTime;
+            if(timeSinceDeath >= timeFromDeathToGameOver)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+            }
+            return;
+        }
+
         timeSinceLastShot += Time.deltaTime;
 
         if(viewCamera.fieldOfView <= readyToShootFov)
@@ -124,6 +141,35 @@ public class FirstPersonController : MonoBehaviour
             }
         }
 
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            RaycastHit hit;
+            if(Physics.Raycast(bulletOrigin.position, bulletOrigin.forward, out hit, interactDistance))
+            {
+                if(hit.collider.CompareTag("Door"))
+                {
+                    if(!hit.collider.GetComponent<DoorScript>().IsLocked())
+                    {
+                        Transform doorTarget = hit.collider.GetComponent<DoorScript>().GetDoorTarget();
+                        controller.enabled = false;
+                        transform.position = doorTarget.position;
+                        controller.enabled = true;
+                        transform.rotation = doorTarget.rotation;
+                        doorSource.Play();
+                    }
+                    else
+                    {
+                        lockedDoorSource.Play();
+                    }
+                }
+                else if(hit.collider.CompareTag("Key"))
+                {
+                    hit.collider.GetComponent<KeyScript>().Pickup();
+                    keySource.Play();
+                }
+            }
+        }
+
         Vector3 movement = new Vector3(moveX, 0, moveY).normalized * moveSpeed;
         movement = transform.TransformDirection(movement);
         controller.Move(movement * Time.deltaTime);
@@ -150,6 +196,7 @@ public class FirstPersonController : MonoBehaviour
         if(health <= 0)
         {
             Debug.Log("Game Over");
+            isDead = true;
         }
 
         Vector3 directionOfEnemy = enemyHeadPosition - transform.position;

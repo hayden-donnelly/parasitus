@@ -16,13 +16,20 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] private float attackTime = 3.0f;
     [SerializeField] private float attackFreezeTime = 2.5f;
     [SerializeField] private float attackRange = 3.0f;
+    private Vector3 startingPosition;
+    [SerializeField] private float playerChaseTime = 10.0f;
+    private float distanceToStartingPointError = 2.0f;
+    private float timeSincePlayerSeen = 100.0f;
     private float timeSinceAttackStart = 0.0f;
     private bool canSeePlayer = false;
     private bool isAttacking = false;
+    [SerializeField] private AudioSource attackSource;
 
     private void Start()
     {
+        playerTransform = GameObject.FindWithTag("Player").transform;
         playerController = playerTransform.GetComponent<FirstPersonController>();
+        startingPosition = transform.position;
     }
 
     public void TakeDamage(bool headshot)
@@ -56,25 +63,6 @@ public class EnemyBase : MonoBehaviour
             }
         }
 
-        /*if(isAttacking)
-        {
-            timeSinceAttackStart += Time.deltaTime;
-            if(timeSinceAttackStart >= attackTime)
-            {
-                Debug.Log("Attack over");
-                isAttacking = false;
-                animator.SetBool("IsAttacking", false);
-                agent.isStopped = false;
-            }
-        }
-        else
-        {
-            isAttacking = true;
-            animator.SetBool("IsAttacking", true);
-            agent.isStopped = true;
-            timeSinceAttackStart = 0.0f;
-        }*/
-
         if(isAttacking)
         {
             timeSinceAttackStart += Time.deltaTime;
@@ -88,6 +76,7 @@ public class EnemyBase : MonoBehaviour
 
         if(canSeePlayer)
         {
+            timeSincePlayerSeen = 0.0f;
             if(!isAttacking)
             {
                 agent.SetDestination(playerTransform.position);
@@ -95,12 +84,22 @@ public class EnemyBase : MonoBehaviour
                 {
                     Vector3 directionOfEnemy = playerTransform.position - transform.position;
                     playerController.DamagePlayer(attackFreezeTime, headTransform.position);
+                    attackSource.Play();
                     isAttacking = true;
                     animator.SetBool("IsAttacking", true);
                     agent.isStopped = true;
                     timeSinceAttackStart = 0.0f;
                 }
             }
+        }
+        else if(!canSeePlayer && timeSincePlayerSeen < playerChaseTime)
+        {
+            timeSincePlayerSeen += Time.deltaTime;
+            agent.SetDestination(playerTransform.position);
+        }
+        else if(Vector3.Distance(transform.position, startingPosition) > distanceToStartingPointError)
+        {
+            agent.SetDestination(startingPosition);
         }
     }
 }
