@@ -1,3 +1,7 @@
+## Linguist ##
+*.hlsl linguist-detectable=false
+*.shader linguist-detectable=false
+
 ## Unity ##
 
 *.cs diff=csharp text
