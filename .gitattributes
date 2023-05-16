@@ -1,6 +1,7 @@
 ## Linguist ##
 *.hlsl linguist-detectable=false
 *.shader linguist-detectable=false
+*.cg linguist-detectable=false
 
 ## Unity ##
 
