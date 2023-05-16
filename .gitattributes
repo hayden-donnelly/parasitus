@@ -1,9 +1,6 @@
 ## Linguist ##
-*.shader linguist-vendored
-*.cso linguist-vendored
-*.h linguist-vendored
-*.hlsli linguist-vendored
-*.fxh linguist-vendored
+* linguist-detectable=false
+*.cs linguist-detectable=true
 
 ## Unity ##
 
