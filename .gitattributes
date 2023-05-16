@@ -1,6 +1,9 @@
 ## Linguist ##
 *.shader linguist-vendored
-*.hlsl linguist-vendored
+*.cso linguist-vendored
+*.h linguist-vendored
+*.hlsli linguist-vendored
+*.fxh linguist-vendored
 
 ## Unity ##
 
